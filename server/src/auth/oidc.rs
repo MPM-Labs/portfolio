@@ -10,6 +10,7 @@ use openidconnect::{
 };
 use serde::Deserialize;
 use tower_sessions::{Session, cookie::time::Duration};
+use tracing::{instrument, Level, event};
 
 use crate::{
     auth::{
@@ -28,6 +29,7 @@ pub struct CallbackParams {
     state: String,
 }
 
+#[instrument(skip_all)]
 pub async fn auth_login_handler(
     State(state): State<AppState>,
     session: Session,
@@ -54,6 +56,7 @@ pub async fn auth_login_handler(
     Ok(Redirect::to(auth_url.as_str()))
 }
 
+#[instrument(skip_all)]
 pub async fn auth_callback_handler(
     Query(params): Query<CallbackParams>,
     State(app_state): State<AppState>,
@@ -66,6 +69,7 @@ pub async fn auth_callback_handler(
         .ok_or(AppError::BadRequest(RequestError::MissingSession("CSRF")))?;
 
     if stored_csrf != params.state {
+        event!(Level::WARN, "CSRF mismatch");
         return Err(AppError::AuthError(AuthError::ValidationError(
             "CSRF token mismatch",
         )));
@@ -105,11 +109,15 @@ pub async fn auth_callback_handler(
 
     let id_token_verifier = app_state.oauth_client.id_token_verifier();
 
-    let claims = id_token.claims(&id_token_verifier, &nonce).map_err(|_| {
-        AppError::AuthError(AuthError::ValidationError(
-            "Failed to verify ID token claims",
-        ))
-    })?;
+    let claims = match id_token.claims(&id_token_verifier, &nonce) {
+        Ok(c) => c,
+        Err(e) => {
+            event!(Level::WARN, error = ?e, "Failed to verify id token claims");
+            return Err(AppError::AuthError(AuthError::ValidationError(
+                "Failed to verify ID token claims",
+            )));
+        }
+    };
 
     if let Some(expected_access_token_hash) = claims.access_token_hash() {
         let signing_alg = id_token.signing_alg().map_err(|_| {
@@ -129,6 +137,7 @@ pub async fn auth_callback_handler(
                 })?;
 
         if actual_access_token_hash != *expected_access_token_hash {
+            event!(Level::WARN, "Access token hash mismatch");
             return Err(AppError::AuthError(AuthError::Unauthorized));
         }
     }
