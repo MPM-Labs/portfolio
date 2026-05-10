@@ -22,6 +22,11 @@ pub mod state;
 async fn main() {
     dotenvy::dotenv().ok();
 
+    tracing_subscriber::fmt()
+        .pretty()
+        .with_max_level(tracing::Level::INFO)
+        .init();
+
     let conf = get_configuration(None).unwrap();
     let addr = conf.leptos_options.site_addr;
     let leptos_options = conf.leptos_options;
