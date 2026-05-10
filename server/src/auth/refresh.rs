@@ -16,7 +16,7 @@ use crate::{
         jwt::{self, Claims},
         refresh,
     },
-    error::AppError,
+    error::{AppError, RequestError},
     state::AppState,
 };
 
@@ -46,12 +46,15 @@ pub async fn refresh_handler(
         .get("refresh")
         .ok_or(AppError::AuthError(AuthError::RefreshError("Missing")))?;
     let hash = blake3::hash(refresh_token.value().as_bytes()).to_string();
-    let stored_hash: String = session.get("refresh").await.unwrap().unwrap();
+    let stored_hash: String = session.get("refresh")
+        .await?
+        .ok_or(AppError::BadRequest(RequestError::MissingSession("Missing refresh token hash")))?;
     if hash != stored_hash {
         event!(Level::WARN, "Invalid refresh token");
         return Err(AppError::AuthError(AuthError::Unauthorized));
     }
 
+    // This is, I admit, an issue. I will fix it when I actually implement a datbase. (TODO)
     let old_jwt = jar.get("jwt").unwrap().value();
     let mut val = Validation::default();
     val.validate_exp = false;
@@ -64,7 +67,8 @@ pub async fn refresh_handler(
 
     let claims = token.claims;
 
-    let new_jwt = jwt::generate(&app_state.jwt_encode, claims.role, claims.sub).unwrap();
+    let new_jwt = jwt::generate(&app_state.jwt_encode, claims.role, claims.sub)
+        .map_err(|e| AppError::AuthError(AuthError::JWTError(e)))?;
 
     let new_refresh = refresh::generate();
     session.insert("refresh", new_refresh.hash).await.unwrap();
