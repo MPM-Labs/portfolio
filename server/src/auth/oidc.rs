@@ -153,14 +153,14 @@ pub async fn auth_callback_handler(
         session.insert("refresh", refresh_token.hash).await.unwrap();
 
         let jwt_cookie = Cookie::build(("jwt", jwt_token))
-            .path("/")
+            .path("/") // TODO: change to /admin when auth works with db
             .same_site(SameSite::Lax)
             .http_only(true)
             .max_age(Duration::minutes(15))
             .build();
 
         let refresh_cookie = Cookie::build(("refresh", refresh_token.token))
-            .path("/")
+            .path("/auth/refresh")
             .same_site(SameSite::Lax)
             .http_only(true)
             .max_age(Duration::days(30))
