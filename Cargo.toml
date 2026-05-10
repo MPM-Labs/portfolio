@@ -28,6 +28,8 @@ thiserror = { version = "2.0.18" }
 jsonwebtoken = { version = "10.3.0", features = ["rust_crypto"] }
 rand = { version = "0.10.1" }
 blake3 = { version = "1.8.5" }
+tracing = { version = "0.1.44" }
+tracing-subscriber = { version = "0.3.23" }
 
 [[workspace.metadata.leptos]]
 name = "portfolio"
