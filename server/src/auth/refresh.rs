@@ -5,8 +5,9 @@ use axum::{
 use axum_extra::extract::CookieJar;
 use axum_extra::extract::cookie::Cookie;
 use jsonwebtoken::{Validation, decode};
+use leptos_use::SameSite;
 use rand::{RngExt, distr::Alphanumeric};
-use tower_sessions::Session;
+use tower_sessions::{Session, cookie::time::Duration};
 
 use crate::{
     auth::{
@@ -64,9 +65,22 @@ pub async fn refresh_handler(
 
     let new_refresh = refresh::generate();
     session.insert("refresh", new_refresh.hash).await.unwrap();
-    let jar = jar
-        .add(Cookie::new("refresh", new_refresh.token))
-        .add(Cookie::new("jwt", new_jwt));
+
+    let jwt_cookie = Cookie::build(("jwt", new_jwt))
+        .path("/")
+        .same_site(SameSite::Lax)
+        .http_only(true)
+        .max_age(Duration::minutes(15))
+        .build();
+
+    let refresh_cookie = Cookie::build(("refresh", new_refresh.token))
+        .path("/")
+        .same_site(SameSite::Lax)
+        .http_only(true)
+        .max_age(Duration::days(30))
+        .build();
+
+    let jar = jar.add(jwt_cookie).add(refresh_cookie);
 
     Ok((jar, Redirect::to("/admin").into_response()))
 }
