@@ -10,7 +10,7 @@ use openidconnect::{
 };
 use serde::Deserialize;
 use tower_sessions::{Session, cookie::time::Duration};
-use tracing::{instrument, Level, event};
+use tracing::{Level, event, instrument};
 
 use crate::{
     auth::{

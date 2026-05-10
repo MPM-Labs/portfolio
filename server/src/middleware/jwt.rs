@@ -26,10 +26,7 @@ pub async fn jwt_validation(
     let token_str = match jar.get("jwt") {
         Some(t) => t.value(),
         None => {
-            event!(
-                Level::DEBUG,
-                "No jwt cookie present, redirecting to /login"
-            );
+            event!(Level::DEBUG, "No jwt cookie present, redirecting to /login");
             return Ok(Redirect::to("/login").into_response());
         }
     };
