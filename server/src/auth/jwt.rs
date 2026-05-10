@@ -1,5 +1,6 @@
 use jsonwebtoken::{EncodingKey, Header, encode, get_current_timestamp};
 use serde::{Deserialize, Serialize};
+use tracing::{Level, event, instrument};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Claims {
@@ -14,6 +15,7 @@ pub enum Role {
     Superuser,
 }
 
+#[instrument(skip_all)]
 pub fn generate(
     key: &EncodingKey,
     role: Role,
@@ -27,6 +29,8 @@ pub fn generate(
         iss: now,
         exp: now + 300,
     };
+
+    event!(Level::DEBUG, claims = ?claims, "Generating jwt");
 
     encode(&Header::default(), &claims, key)
 }
