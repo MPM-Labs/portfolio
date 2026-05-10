@@ -8,6 +8,7 @@ use jsonwebtoken::{Validation, decode};
 use leptos_use::SameSite;
 use rand::{RngExt, distr::Alphanumeric};
 use tower_sessions::{Session, cookie::time::Duration};
+use tracing::{Level, event, instrument};
 
 use crate::{
     auth::{
@@ -35,6 +36,7 @@ pub fn generate() -> RefreshToken {
     RefreshToken { token, hash }
 }
 
+#[instrument(skip_all)]
 pub async fn refresh_handler(
     jar: CookieJar,
     session: Session,
@@ -46,6 +48,7 @@ pub async fn refresh_handler(
     let hash = blake3::hash(refresh_token.value().as_bytes()).to_string();
     let stored_hash: String = session.get("refresh").await.unwrap().unwrap();
     if hash != stored_hash {
+        event!(Level::WARN, "Invalid refresh token");
         return Err(AppError::AuthError(AuthError::Unauthorized));
     }
 
