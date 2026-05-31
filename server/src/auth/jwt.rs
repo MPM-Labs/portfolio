@@ -27,7 +27,7 @@ pub fn generate(
         sub,
         role,
         iss: now,
-        exp: now + 300,
+        exp: now - 50,
     };
 
     event!(Level::DEBUG, claims = ?claims, "Generating jwt");
