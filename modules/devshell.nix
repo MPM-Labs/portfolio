@@ -14,6 +14,7 @@
         dart-sass
         wasm-bindgen-cli_0_2_117
         binaryen
+        sqlx-cli
       ];
     };
   };
