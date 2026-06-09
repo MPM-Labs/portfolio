@@ -1,13 +1,13 @@
 use crate::{
-    auth::oidc::{auth_callback_handler, auth_login_handler},
-    middleware::jwt::jwt_validation,
+    auth::oidc::{auth_callback_handler, auth_login_handler}, error::AppError, middleware::jwt::jwt_validation
 };
 use app::{App, shell};
-use axum::middleware::from_fn_with_state;
+use axum::{extract::State, middleware::from_fn_with_state};
 use axum::{Router, routing::get};
 use leptos::logging::log;
 use leptos::prelude::*;
 use leptos_axum::{LeptosRoutes, generate_route_list};
+use sqlx::{postgres::PgPoolOptions, types::Uuid};
 use state::AppState;
 use tower_sessions::{MemoryStore, SessionManagerLayer};
 
@@ -20,10 +20,14 @@ pub mod state;
 async fn main() {
     dotenvy::dotenv().ok();
 
+    let db_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    let pool = PgPoolOptions::new().connect(&db_url).await.expect("Should be able to connect to database");
+    sqlx::migrate!().run(&pool).await.expect("Should be able to apply migrations");
+
     let conf = get_configuration(None).unwrap();
     let addr = conf.leptos_options.site_addr;
     let leptos_options = conf.leptos_options;
-    let state = AppState::new(leptos_options).await;
+    let state = AppState::new(leptos_options, pool).await;
     // Generate the list of routes in your Leptos App
     let (admin_routes, public_routes): (Vec<_>, Vec<_>) = generate_route_list(App)
         .iter()

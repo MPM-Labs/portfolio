@@ -8,6 +8,7 @@ use openidconnect::{
     core::{CoreClient, CoreProviderMetadata},
     reqwest::{Client, ClientBuilder, redirect},
 };
+use sqlx::{Pool, Postgres};
 
 pub type OidcClient = CoreClient<
     EndpointSet,      // HasAuthUrl
@@ -25,6 +26,7 @@ pub struct AppState {
     pub http_client: Client,
     pub jwt_encode: Arc<EncodingKey>,
     pub jwt_decode: Arc<DecodingKey>,
+    pub pool: Pool<Postgres>,
 }
 
 impl FromRef<AppState> for LeptosOptions {
@@ -34,7 +36,7 @@ impl FromRef<AppState> for LeptosOptions {
 }
 
 impl AppState {
-    pub async fn new(leptos_options: LeptosOptions) -> Self {
+    pub async fn new(leptos_options: LeptosOptions, pool: Pool<Postgres>) -> Self {
         let client_id = std::env::var("CLIENT_ID").expect("CLIENT_ID should be set");
         let client_secret = std::env::var("CLIENT_SECRET").expect("CLIENT_SECRET should be set");
 
@@ -72,6 +74,7 @@ impl AppState {
             http_client,
             jwt_encode,
             jwt_decode,
+            pool
         }
     }
 }

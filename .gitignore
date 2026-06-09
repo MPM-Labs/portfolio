@@ -6,3 +6,4 @@ result
 ssh_keys
 .env
 .direnv
+data
