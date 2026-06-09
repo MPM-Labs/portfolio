@@ -46,9 +46,13 @@ pub async fn refresh_handler(
         .get("refresh")
         .ok_or(AppError::AuthError(AuthError::RefreshError("Missing")))?;
     let hash = blake3::hash(refresh_token.value().as_bytes()).to_string();
-    let stored_hash: String = session.get("refresh")
-        .await?
-        .ok_or(AppError::BadRequest(RequestError::MissingSession("Missing refresh token hash")))?;
+    let stored_hash: String =
+        session
+            .get("refresh")
+            .await?
+            .ok_or(AppError::BadRequest(RequestError::MissingSession(
+                "Missing refresh token hash",
+            )))?;
     if hash != stored_hash {
         event!(Level::WARN, "Invalid refresh token");
         return Err(AppError::AuthError(AuthError::Unauthorized));

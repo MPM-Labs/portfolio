@@ -23,3 +23,4 @@ blake3 = { workspace = true }
 axum-extra = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
+sqlx = { workspace = true }
