@@ -1,9 +1,5 @@
 use crate::{
-    auth::{
-        oidc::{auth_callback_handler, auth_login_handler},
-        refresh::refresh_handler,
-    },
-    middleware::jwt::jwt_validation,
+    handlers::{auth::auth_callback_handler, login::auth_login_handler, refresh::refresh_handler}, middleware::jwt::jwt_validation
 };
 use app::{App, shell};
 use axum::{Router, middleware::from_fn_with_state, routing::get};
@@ -17,6 +13,8 @@ pub mod auth;
 pub mod error;
 pub mod middleware;
 pub mod state;
+pub mod models;
+pub mod handlers;
 
 #[tokio::main]
 async fn main() {

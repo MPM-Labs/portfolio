@@ -5,8 +5,8 @@ use axum::{
 use axum_extra::extract::CookieJar;
 use leptos_use::SameSite;
 use openidconnect::{
-    AccessTokenHash, AuthorizationCode, CsrfToken, Nonce, OAuth2TokenResponse, PkceCodeChallenge,
-    Scope, TokenResponse, core::CoreAuthenticationFlow,
+    AccessTokenHash, AuthorizationCode, Nonce, OAuth2TokenResponse,
+    TokenResponse,
 };
 use serde::Deserialize;
 use tower_sessions::{Session, cookie::time::Duration};
@@ -27,33 +27,6 @@ use axum_extra::extract::cookie::Cookie;
 pub struct CallbackParams {
     code: String,
     state: String,
-}
-
-#[instrument(skip_all)]
-pub async fn auth_login_handler(
-    State(state): State<AppState>,
-    session: Session,
-) -> Result<impl IntoResponse, AppError> {
-    let (pkce_challenge, pkce_verifier) = PkceCodeChallenge::new_random_sha256();
-
-    let (auth_url, csrf_token, nonce) = state
-        .oauth_client
-        .authorize_url(
-            CoreAuthenticationFlow::AuthorizationCode,
-            CsrfToken::new_random,
-            Nonce::new_random,
-        )
-        .add_scope(Scope::new("email".to_string()))
-        .set_pkce_challenge(pkce_challenge)
-        .url();
-
-    session.insert("csrf_token", csrf_token.secret()).await?;
-    session.insert("nonce", nonce.secret()).await?;
-    session
-        .insert("pkce_verifier", pkce_verifier.secret())
-        .await?;
-
-    Ok(Redirect::to(auth_url.as_str()))
 }
 
 #[instrument(skip_all)]
