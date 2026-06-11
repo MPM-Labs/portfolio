@@ -1,5 +1,6 @@
 use crate::{
-    handlers::{auth::auth_callback_handler, login::auth_login_handler, refresh::refresh_handler}, middleware::jwt::jwt_validation
+    handlers::{auth::auth_callback_handler, login::auth_login_handler, refresh::refresh_handler},
+    middleware::jwt::jwt_validation,
 };
 use app::{App, shell};
 use axum::{Router, middleware::from_fn_with_state, routing::get};
@@ -11,10 +12,10 @@ use tower_sessions::{MemoryStore, SessionManagerLayer};
 
 pub mod auth;
 pub mod error;
-pub mod middleware;
-pub mod state;
-pub mod models;
 pub mod handlers;
+pub mod middleware;
+pub mod models;
+pub mod state;
 
 #[tokio::main]
 async fn main() {

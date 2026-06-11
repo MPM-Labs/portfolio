@@ -1,4 +1,7 @@
-use axum::{extract::State, response::{IntoResponse, Redirect}};
+use axum::{
+    extract::State,
+    response::{IntoResponse, Redirect},
+};
 use openidconnect::{CsrfToken, Nonce, PkceCodeChallenge, Scope, core::CoreAuthenticationFlow};
 use tower_sessions::Session;
 use tracing::instrument;

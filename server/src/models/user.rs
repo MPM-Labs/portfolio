@@ -13,5 +13,5 @@ pub struct Email(String);
 #[derive(sqlx::Type)]
 pub struct User {
     role: Role,
-    email: Email
+    email: Email,
 }

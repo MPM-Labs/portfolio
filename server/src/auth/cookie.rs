@@ -1,16 +1,19 @@
-use tower_sessions::cookie::{CookieBuilder, SameSite, time::Duration};
+use tower_sessions::cookie::{SameSite, time::Duration};
 
 pub enum CookieKind {
     JWT,
     Refresh,
 }
 
-pub struct Cookie {
+pub struct Cookie<'a> {
     kind: CookieKind,
-    token: String,
+    token: &'a str,
 }
 
-impl Cookie {
+impl<'a> Cookie<'a> {
+    pub fn new(kind: CookieKind, token: &'a str) -> Self {
+        Cookie { kind, token }
+    }
     pub fn name(&self) -> &'static str {
         match self.kind {
             CookieKind::JWT => "jwt",
@@ -29,8 +32,8 @@ impl Cookie {
             CookieKind::Refresh => Duration::days(30),
         }
     }
-    pub fn build(&self) -> CookieBuilder<'_> {
-        tower_sessions::cookie::Cookie::build((self.name(), &self.token))
+    pub fn build(&self) -> tower_sessions::cookie::CookieBuilder<'static> {
+        tower_sessions::cookie::Cookie::build((self.name(), self.token.to_owned()))
             .path(self.path())
             .same_site(SameSite::Lax)
             .http_only(true)
