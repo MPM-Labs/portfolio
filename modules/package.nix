@@ -12,6 +12,7 @@
         (craneLib.filterCargoSources path type)
         || (lib.hasInfix "/.sqlx/" path)
         || (lib.hasInfix "/.sqlx" path)
+        || (lib.hasInfix "/server/migrations/" path)
         || (lib.hasInfix "/style/" path)
         || (lib.hasInfix "/public/" path);
     };
