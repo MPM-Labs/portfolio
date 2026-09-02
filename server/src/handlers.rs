@@ -1,3 +1,2 @@
 pub mod auth;
-pub mod login;
-pub mod refresh;
+pub mod test_echo_role;

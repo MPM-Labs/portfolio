@@ -1,5 +1,10 @@
 use crate::{
-    handlers::{auth::auth_callback_handler, login::auth_login_handler, refresh::refresh_handler},
+    handlers::{
+        auth::{
+            callback::auth_callback_handler, login::auth_login_handler, refresh::refresh_handler,
+        },
+        test_echo_role::test_echo_role_handler,
+    },
     middleware::jwt::jwt_validation,
 };
 use app::{App, shell};
@@ -9,6 +14,8 @@ use leptos_axum::{LeptosRoutes, generate_route_list};
 use sqlx::postgres::PgPoolOptions;
 use state::AppState;
 use tower_sessions::{MemoryStore, SessionManagerLayer};
+
+use crate::auth::cookie::secure_cookie_mode;
 
 pub mod auth;
 pub mod error;
@@ -47,7 +54,7 @@ async fn main() {
 
     let session_store = MemoryStore::default();
     let session_layer = SessionManagerLayer::new(session_store)
-        .with_secure(false)
+        .with_secure(secure_cookie_mode())
         .with_same_site(leptos_use::SameSite::Lax);
 
     let app = Router::new()
@@ -55,6 +62,7 @@ async fn main() {
             let leptos_options = state.leptos_options.clone();
             move || shell(leptos_options.clone())
         })
+        .route("/admin/get-role", get(test_echo_role_handler))
         .layer(from_fn_with_state(state.clone(), jwt_validation)) // Affects all above it. Should be cheap to clone with internally Arc'ed fields.
         .route("/auth/login", get(auth_login_handler))
         .route("/auth/callback", get(auth_callback_handler))

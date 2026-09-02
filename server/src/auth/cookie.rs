@@ -1,5 +1,12 @@
 use tower_sessions::cookie::{SameSite, time::Duration};
 
+pub fn secure_cookie_mode() -> bool {
+    match std::env::var("ENVIRONMENT").as_deref() {
+        Ok("dev") | Ok("development") => false,
+        _ => true,
+    }
+}
+
 pub enum CookieKind {
     JWT,
     Refresh,
@@ -33,10 +40,16 @@ impl<'a> Cookie<'a> {
         }
     }
     pub fn build(&self) -> tower_sessions::cookie::CookieBuilder<'static> {
-        tower_sessions::cookie::Cookie::build((self.name(), self.token.to_owned()))
+        let builder = tower_sessions::cookie::Cookie::build((self.name(), self.token.to_owned()))
             .path(self.path())
             .same_site(SameSite::Lax)
             .http_only(true)
-            .max_age(self.age())
+            .max_age(self.age());
+
+        if secure_cookie_mode() {
+            builder.secure(true)
+        } else {
+            builder.secure(false)
+        }
     }
 }

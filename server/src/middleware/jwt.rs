@@ -8,10 +8,7 @@ use jsonwebtoken::{Validation, decode, errors::ErrorKind as jwtErrorKind};
 use tracing::{Level, event, instrument};
 
 use crate::{
-    auth::{
-        error::AuthError,
-        jwt::{Claims, Role},
-    },
+    auth::{error::AuthError, jwt::Claims},
     error::AppError,
     state::AppState,
 };
@@ -20,7 +17,7 @@ use crate::{
 pub async fn jwt_validation(
     State(state): State<AppState>,
     jar: CookieJar,
-    req: Request,
+    mut req: Request,
     next: Next,
 ) -> Result<Response, AppError> {
     let token_str = match jar.get("jwt") {
@@ -49,14 +46,9 @@ pub async fn jwt_validation(
         },
     };
 
-    event!(Level::DEBUG, role = ?token.claims.role, "JWT valid");
+    event!(Level::DEBUG, role = ?token.claims.user.role, "JWT valid");
 
-    match token.claims.role {
-        Role::Superuser => Ok(next.run(req).await),
-        #[allow(unreachable_patterns)]
-        r => {
-            event!(Level::WARN, role = ?r, "Unauthorized role");
-            Err(AppError::AuthError(AuthError::Unauthorized))
-        }
-    }
+    req.extensions_mut().insert(token.claims.user);
+
+    Ok(next.run(req).await)
 }
