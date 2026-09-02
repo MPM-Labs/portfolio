@@ -10,6 +10,8 @@
       src = ../.;
       filter = path: type:
         (craneLib.filterCargoSources path type)
+        || (lib.hasInfix "/.sqlx/" path)
+        || (lib.hasInfix "/.sqlx" path)
         || (lib.hasInfix "/style/" path)
         || (lib.hasInfix "/public/" path);
     };
@@ -32,6 +34,7 @@
       SASS_PATH = "${pkgs.dart-sass}/bin/sass";
 
       configurePhase = ''
+        export SQLX_OFFLINE=true
         runHook preConfigure
         export HOME=$(mktemp -d)
         export CARGO_HOME=$PWD/.cargo-home
