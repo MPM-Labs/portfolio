@@ -74,7 +74,7 @@ impl AppState {
             http_client,
             jwt_encode,
             jwt_decode,
-            pool
+            pool,
         }
     }
 }

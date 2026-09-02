@@ -4,6 +4,8 @@ use thiserror::Error;
 pub enum AuthError {
     #[error("jwt error: {0}")]
     JWTError(#[from] jsonwebtoken::errors::Error),
+    #[error("refresh error: {0}")]
+    RefreshError(&'static str),
     #[error("unauthorized")]
     Unauthorized,
     #[error("Validation error: {0}")]

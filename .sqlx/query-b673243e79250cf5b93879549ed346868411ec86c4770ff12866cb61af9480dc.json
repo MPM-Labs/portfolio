@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO users(name, email, role) VALUES ($1, $2, $3)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        {
+          "Custom": {
+            "name": "role",
+            "kind": {
+              "Enum": [
+                "superuser",
+                "admin",
+                "contributor",
+                "user"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b673243e79250cf5b93879549ed346868411ec86c4770ff12866cb61af9480dc"
+}

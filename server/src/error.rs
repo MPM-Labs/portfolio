@@ -28,7 +28,7 @@ impl IntoResponse for AppError {
             Self::SessionError(_) => (StatusCode::INTERNAL_SERVER_ERROR, "Session storage failed"),
             Self::AuthError(_) => (StatusCode::INTERNAL_SERVER_ERROR, "Authorization failed"),
             Self::BadRequest(_) => (StatusCode::BAD_REQUEST, "Bad request"),
-            Self::DatabaseError(_) => (StatusCode::INTERNAL_SERVER_ERROR, "Database failure")
+            Self::DatabaseError(_) => (StatusCode::INTERNAL_SERVER_ERROR, "Database failure"),
         };
 
         body.into_response()

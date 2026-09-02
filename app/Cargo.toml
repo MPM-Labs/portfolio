@@ -12,6 +12,9 @@ leptos_router = { workspace = true }
 leptos_meta = { workspace = true }
 leptos-use = { workspace = true }
 
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+gloo-net = { workspace = true }
+
 # SSR-only deps, gated by feature
 leptos_axum = { workspace = true, optional = true }
 axum = { workspace = true, optional = true }
