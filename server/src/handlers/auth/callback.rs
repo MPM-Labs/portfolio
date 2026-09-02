@@ -213,18 +213,6 @@ pub async fn auth_callback_handler(
                 "callback: existing user found"
             );
 
-            // TEMP: hardcoded superuser bump for jonas — remove once confirmed fixed
-            if email == "jonas.baugerud@gmail.com" {
-                event!(Level::WARN, email = %email, "callback: applying hardcoded superuser bump");
-                sqlx::query!(
-                    "UPDATE users SET role = $1 WHERE email = $2",
-                    Role::Superuser as Role,
-                    email
-                )
-                .execute(&app_state.pool)
-                .await?;
-            }
-
             // Gen JWT
             let jwt_token = match jwt::generate(&app_state.jwt_encode, &user) {
                 Ok(t) => t,
