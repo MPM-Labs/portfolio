@@ -17,6 +17,7 @@ pub fn Footer() -> impl IntoView {
                 <p>"Jonas Hazeland Baugerud"</p>
             </section>
             <section>
+                <a href="/privacy">"Privacy Policy"</a>
                 <a href="#">
                     <img src="arrow_logo.svg" />
                 </a>

@@ -62,7 +62,10 @@ pub async fn auth_callback_handler(
         }
     };
 
-    event!(Level::INFO, "callback: session values present (csrf, pkce, nonce all found)");
+    event!(
+        Level::INFO,
+        "callback: session values present (csrf, pkce, nonce all found)"
+    );
 
     // Check CSRF
     if stored_csrf != params.state {
@@ -100,7 +103,10 @@ pub async fn auth_callback_handler(
         }
     };
 
-    event!(Level::INFO, "callback: code exchange succeeded, extracting id_token");
+    event!(
+        Level::INFO,
+        "callback: code exchange succeeded, extracting id_token"
+    );
 
     let id_token = match token_response.id_token() {
         Some(t) => t,
@@ -132,7 +138,10 @@ pub async fn auth_callback_handler(
 
     // Match access token hash (timing side channel patch)
     if let Some(expected_access_token_hash) = claims.access_token_hash() {
-        event!(Level::INFO, "callback: access_token_hash present in claims, verifying");
+        event!(
+            Level::INFO,
+            "callback: access_token_hash present in claims, verifying"
+        );
 
         let signing_alg = match id_token.signing_alg() {
             Ok(a) => a,
@@ -175,7 +184,10 @@ pub async fn auth_callback_handler(
 
         event!(Level::INFO, "callback: access_token_hash verified ok");
     } else {
-        event!(Level::INFO, "callback: no access_token_hash in claims, skipping check");
+        event!(
+            Level::INFO,
+            "callback: no access_token_hash in claims, skipping check"
+        );
     }
 
     // Get email, should be in claims
@@ -228,7 +240,10 @@ pub async fn auth_callback_handler(
             let refresh_token = refresh::generate();
 
             // Store refresh hash in session
-            if let Err(e) = session.insert("refresh", (refresh_token.hash, user.id)).await {
+            if let Err(e) = session
+                .insert("refresh", (refresh_token.hash, user.id))
+                .await
+            {
                 event!(Level::ERROR, error = ?e, "AUTH_FAIL: session_insert_refresh_failed");
                 return Err(e.into());
             }
