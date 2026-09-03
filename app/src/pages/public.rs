@@ -17,7 +17,7 @@ use crate::{
 mod about;
 mod contact;
 mod home;
-mod portfolio;
+pub mod portfolio;
 mod privacy;
 
 #[component(transparent)]
