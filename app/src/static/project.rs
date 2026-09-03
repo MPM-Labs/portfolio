@@ -4,13 +4,14 @@ use leptos::prelude::*;
 #[component]
 pub fn ProjectCard(project: Project) -> impl IntoView {
     view! {
-        <div>
-            <h2>{project.title.clone()}</h2>
-            <span class=format!(
-                "status-badge {}",
-                project.status.css_class(),
-            )>{project.status.label()}</span>
-            <p class="description">{project.description_line.clone()}</p>
+        <div class="project-card">
+            <div class="title">
+                <h2>{project.title.clone()}</h2>
+                <p class=format!(
+                    "status-badge {}",
+                    project.status.css_class(),
+                )>"Status: "{project.status.label()}</p>
+            </div>
             <ul class="languages">
                 <For
                     each=move || project.languages.clone()
@@ -18,27 +19,31 @@ pub fn ProjectCard(project: Project) -> impl IntoView {
                     children=move |lang: String| view! { <li>{lang}</li> }
                 />
             </ul>
-            {project.collaborative.then(|| view! { <p class="collab-tag">"Collaborative"</p> })}
-            {project
-                .repo_url
-                .clone()
-                .map(|url| {
-                    view! {
-                        <a href=url target="_blank">
-                            "Repo"
-                        </a>
-                    }
-                })}
-            {project
-                .live_url
-                .clone()
-                .map(|url| {
-                    view! {
-                        <a href=url target="_blank">
-                            "Live"
-                        </a>
-                    }
-                })}
+            <p class="description">{project.description_line.clone()}</p>
+            <div class="links">
+                {project
+                    .repo_url
+                    .clone()
+                    .map(|url| {
+                        view! {
+                            <a href=url target="_blank">
+                                "Repository"
+                            </a>
+                        }
+                    })}
+                {project
+                    .live_url
+                    .clone()
+                    .map(|url| {
+                        view! {
+                            <a href=url target="_blank">
+                                "Live Artifact"
+                            </a>
+                        }
+                    })}
+            </div>
         </div>
     }
 }
+
+// {project.collaborative.then(|| view! { <p class="collab-tag">"Collaborative"</p> })}
