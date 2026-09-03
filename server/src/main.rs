@@ -3,14 +3,13 @@ use crate::{
         auth::{
             callback::auth_callback_handler, login::auth_login_handler, refresh::refresh_handler,
         },
-        test_echo_role::test_echo_role_handler,
     },
     middleware::jwt::jwt_validation,
 };
 use app::{App, shell};
 use axum::{Router, middleware::from_fn_with_state, routing::get};
 use leptos::prelude::*;
-use leptos_axum::{LeptosRoutes, generate_route_list};
+use leptos_axum::{LeptosRoutes, generate_route_list, generate_route_list_with_exclusions};
 use sqlx::postgres::PgPoolOptions;
 use state::AppState;
 use tower_sessions::{MemoryStore, SessionManagerLayer};
@@ -47,10 +46,18 @@ async fn main() {
     let leptos_options = conf.leptos_options;
     let state = AppState::new(leptos_options, pool).await;
     // Generate the list of routes in your Leptos App
-    let (admin_routes, public_routes): (Vec<_>, Vec<_>) = generate_route_list(App)
+    let (admin_routes, _): (Vec<_>, Vec<_>) = generate_route_list(App)
         .iter()
         .cloned()
         .partition(|i| i.path().starts_with("/admin"));
+
+    let public_routes = generate_route_list_with_exclusions(
+        App,
+        Some(vec!["/api/get-role".to_string()]),
+    )
+    .into_iter()
+    .filter(|route| !route.path().starts_with("/admin"))
+    .collect();
 
     let session_store = MemoryStore::default();
     let session_layer = SessionManagerLayer::new(session_store)
@@ -62,7 +69,6 @@ async fn main() {
             let leptos_options = state.leptos_options.clone();
             move || shell(leptos_options.clone())
         })
-        .route("/admin/get-role", get(test_echo_role_handler))
         .layer(from_fn_with_state(state.clone(), jwt_validation)) // Affects all above it. Should be cheap to clone with internally Arc'ed fields.
         .route("/auth/login", get(auth_login_handler))
         .route("/auth/callback", get(auth_callback_handler))

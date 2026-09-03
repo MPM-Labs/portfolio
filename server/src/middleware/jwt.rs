@@ -48,6 +48,8 @@ pub async fn jwt_validation(
 
     event!(Level::DEBUG, role = ?token.claims.user.role, "JWT valid");
 
+    let role = format!("{:?}", token.claims.user.role);
+    req.extensions_mut().insert(role);
     req.extensions_mut().insert(token.claims.user);
 
     Ok(next.run(req).await)

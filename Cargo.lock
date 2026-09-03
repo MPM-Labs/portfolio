@@ -51,7 +51,6 @@ dependencies = [
  "axum",
  "axum-extra",
  "dotenvy",
- "gloo-net",
  "leptos",
  "leptos-use",
  "leptos_axum",
