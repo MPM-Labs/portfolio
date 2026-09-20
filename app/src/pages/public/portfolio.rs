@@ -1,3 +1,4 @@
+use crate::models::user::Role;
 use crate::r#static::project::ProjectCard;
 use leptos::prelude::*;
 use leptos::server;
@@ -183,6 +184,13 @@ pub async fn list_projects() -> Result<Vec<Project>, ServerFnError> {
 pub async fn save_project(project: ProjectDraft) -> Result<(), ServerFnError> {
     #[cfg(feature = "ssr")]
     {
+        let Extension(role): Extension<Role> = extract().await?;
+
+        match role {
+            Role::Admin | Role::Superuser => (),
+            _ => return Err(ServerFnError::new("unauthorized")),
+        }
+
         let Extension(pool): Extension<Pool<Postgres>> = extract().await?;
         let title = project.title.trim();
         let description_line = project.description_line.trim();
@@ -274,6 +282,13 @@ pub async fn save_project(project: ProjectDraft) -> Result<(), ServerFnError> {
 pub async fn delete_project(id: i64) -> Result<(), ServerFnError> {
     #[cfg(feature = "ssr")]
     {
+        let Extension(role): Extension<Role> = extract().await?;
+
+        match role {
+            Role::Admin | Role::Superuser => (),
+            _ => return Err(ServerFnError::new("unauthorized")),
+        }
+
         let Extension(pool): Extension<Pool<Postgres>> = extract().await?;
         sqlx::query("DELETE FROM projects WHERE id = $1")
             .bind(id)

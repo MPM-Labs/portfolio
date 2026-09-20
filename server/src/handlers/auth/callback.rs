@@ -1,4 +1,3 @@
-use crate::models::user::{Role, User};
 use axum::{
     extract::{Query, State},
     response::{IntoResponse, Redirect},
@@ -10,6 +9,8 @@ use openidconnect::{
 use serde::Deserialize;
 use tower_sessions::Session;
 use tracing::{Level, event, instrument};
+
+use app::models::user::{Role, User};
 
 use crate::{
     auth::{

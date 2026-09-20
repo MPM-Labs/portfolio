@@ -12,6 +12,7 @@ leptos_router = { workspace = true }
 leptos_meta = { workspace = true }
 leptos-use = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
+uuid = { version = "1", features = ["serde", "v4", "js"] }
 
 # SSR-only deps, gated by feature
 leptos_axum = { workspace = true, optional = true }
