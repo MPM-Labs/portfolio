@@ -9,6 +9,8 @@ use tower_sessions::{Session, cookie::time::Duration};
 use tracing::{Level, event, instrument};
 use uuid::Uuid;
 
+use app::models::user::{Role, User};
+
 use crate::{
     auth::{
         error::AuthError,
@@ -16,7 +18,6 @@ use crate::{
         refresh,
     },
     error::{AppError, RequestError},
-    models::user::{Role, User},
     state::AppState,
 };
 

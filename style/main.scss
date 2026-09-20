@@ -160,6 +160,83 @@ main > .full > * {
     text-align: center;
 }
 
+main > .portfolio-intro > * {
+    padding-bottom: 0.5em;
+}
+
+main > .portfolio-projects {
+    padding-top: 0;
+}
+
+/* ======== PORTFOLIO ======== */
+.projects-grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    align-content: start;
+}
+
+.project-card {
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--eerie-black-light);
+    border-radius: 3px;
+    padding: 5px;
+}
+
+.project-card .title {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.project-card .title h2 {
+    font-size: 18px;
+    margin: 0;
+}
+
+.project-card .languages {
+    display: flex;
+    flex-wrap: wrap;
+    list-style: none;
+    color: var(--keppel);
+    margin: 15px;
+    padding: 0;
+}
+
+.project-card .languages li + li::before {
+    content: "•";
+    margin: 0 0.35em;
+}
+
+.project-card .description {
+    margin: 15px;
+}
+
+.project-card .links {
+    display: flex;
+    gap: 6px;
+}
+
+.project-card .links a {
+    display: block;
+    padding: 10px;
+    background-color: var(--cerulean-dark);
+    border-radius: 5px;
+    color: var(--isabelline);
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+}
+
+.project-card .links a:hover {
+    background-color: var(--cerulean-extra-dark);
+}
+
 /* ======== FOOTER ======== */
 
 footer {

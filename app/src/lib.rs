@@ -29,6 +29,7 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
     }
 }
 
+pub mod models;
 mod pages;
 mod r#static;
 

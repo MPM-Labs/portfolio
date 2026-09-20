@@ -1,10 +1,10 @@
 use tower_sessions::cookie::{SameSite, time::Duration};
 
 pub fn secure_cookie_mode() -> bool {
-    match std::env::var("ENVIRONMENT").as_deref() {
-        Ok("dev") | Ok("development") => false,
-        _ => true,
-    }
+    !matches!(
+        std::env::var("ENVIRONMENT").as_deref(),
+        Ok("dev") | Ok("development")
+    )
 }
 
 pub enum CookieKind {

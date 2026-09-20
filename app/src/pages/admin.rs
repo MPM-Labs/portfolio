@@ -7,10 +7,12 @@ use leptos_router::{
     path,
 };
 use overview::Overview;
+use projects::Projects;
 
 use see_role::SeeRole;
 
 mod overview;
+mod projects;
 mod see_role;
 
 #[component(transparent)]
@@ -18,6 +20,7 @@ pub fn AdminRoutes() -> impl MatchNestedRoutes + Clone {
     view! {
         <Route path=path!("") view=Overview />
         <Route path=path!("/overview") view=Overview />
+        <Route path=path!("/projects") view=Projects />
         <Route path=path!("/see-role") view=SeeRole />
     }
     .into_inner()

@@ -1,8 +1,7 @@
+use app::models::user::User;
 use jsonwebtoken::{EncodingKey, Header, encode, get_current_timestamp};
 use serde::{Deserialize, Serialize};
 use tracing::{Level, event, instrument};
-
-use crate::models::user::User;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Claims {
