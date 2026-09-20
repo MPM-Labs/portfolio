@@ -21,9 +21,9 @@ impl From<()> for Role {
 #[sqlx(transparent)]
 pub struct Email(String);
 
-impl Into<String> for Email {
-    fn into(self) -> String {
-        self.0
+impl From<Email> for String {
+    fn from(value: Email) -> Self {
+        value.0
     }
 }
 

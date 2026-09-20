@@ -21,7 +21,9 @@ pub fn SeeRole() -> impl IntoView {
     view! {
         <section class="see-role">
             <h1>"See Role"</h1>
-            <Suspense fallback=move || view! { <p>"Loading your role..."</p> }>
+            <Suspense fallback=move || {
+                view! { <p>"Loading your role..."</p> }
+            }>
                 {move || match role.get() {
                     Some(Ok(role)) => {
                         view! { <p>"Your role is " <strong>{role}</strong></p> }.into_any()

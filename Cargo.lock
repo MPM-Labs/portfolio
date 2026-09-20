@@ -58,6 +58,7 @@ dependencies = [
  "leptos_router",
  "openidconnect",
  "serde",
+ "sqlx",
  "tokio",
  "tower-sessions",
 ]

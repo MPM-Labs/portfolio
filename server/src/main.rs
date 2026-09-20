@@ -1,15 +1,21 @@
 use crate::{
-    handlers::{
-        auth::{
-            callback::auth_callback_handler, login::auth_login_handler, refresh::refresh_handler,
-        },
+    handlers::auth::{
+        callback::auth_callback_handler, login::auth_login_handler, refresh::refresh_handler,
     },
     middleware::jwt::jwt_validation,
 };
 use app::{App, shell};
-use axum::{Router, middleware::from_fn_with_state, routing::get};
-use leptos::prelude::*;
-use leptos_axum::{LeptosRoutes, generate_route_list, generate_route_list_with_exclusions};
+use axum::{
+    Extension, Router,
+    extract::Request,
+    middleware::from_fn_with_state,
+    routing::{get, post},
+};
+use leptos::{prelude::*, server_fn::axum::server_fn_paths};
+use leptos_axum::{
+    AxumRouteListing, generate_route_list, generate_route_list_with_exclusions,
+    handle_server_fns_with_context, render_app_to_stream_with_context,
+};
 use sqlx::postgres::PgPoolOptions;
 use state::AppState;
 use tower_sessions::{MemoryStore, SessionManagerLayer};
@@ -44,39 +50,84 @@ async fn main() {
     let conf = get_configuration(None).unwrap();
     let addr = conf.leptos_options.site_addr;
     let leptos_options = conf.leptos_options;
-    let state = AppState::new(leptos_options, pool).await;
+    let state = AppState::new(leptos_options, pool.clone()).await;
+
+    let server_fn_handler = {
+        let state = state.clone();
+        move |req: Request| {
+            let state = state.clone();
+            async move {
+                handle_server_fns_with_context(move || provide_context(state.clone()), req).await
+            }
+        }
+    };
+
+    let (admin_fns, public_fns): (Vec<_>, Vec<_>) =
+        server_fn_paths().partition(|(path, _method)| path.starts_with("/admin"));
+
+    let mut admin_router: Router<AppState> = Router::new();
+    for (path, _) in admin_fns {
+        admin_router = admin_router.route(path, post(server_fn_handler.clone()));
+    }
+
+    let mut public_router: Router<AppState> = Router::new();
+    for (path, _) in public_fns {
+        public_router = public_router.route(path, post(server_fn_handler.clone()));
+    }
+
     // Generate the list of routes in your Leptos App
     let (admin_routes, _): (Vec<_>, Vec<_>) = generate_route_list(App)
         .iter()
         .cloned()
         .partition(|i| i.path().starts_with("/admin"));
 
-    let public_routes = generate_route_list_with_exclusions(
-        App,
-        Some(vec!["/api/get-role".to_string()]),
-    )
-    .into_iter()
-    .filter(|route| !route.path().starts_with("/admin"))
-    .collect();
+    let public_routes: Vec<AxumRouteListing> =
+        generate_route_list_with_exclusions(App, Some(vec!["/api/get-role".to_string()]))
+            .into_iter()
+            .filter(|route| !route.path().starts_with("/admin"))
+            .collect();
+
+    let page_handler = {
+        let state = state.clone();
+        let leptos_options = state.leptos_options.clone();
+        move || {
+            let state = state.clone();
+            let leptos_options = leptos_options.clone();
+            render_app_to_stream_with_context(
+                move || provide_context(state.clone()),
+                move || shell(leptos_options.clone()),
+            )
+        }
+    };
+
+    let mut admin_pages: Router<AppState> = Router::new();
+    for route in &admin_routes {
+        admin_pages = admin_pages.route(route.path(), get(page_handler()));
+    }
+
+    let mut public_pages: Router<AppState> = Router::new();
+    for route in &public_routes {
+        public_pages = public_pages.route(route.path(), get(page_handler()));
+    }
 
     let session_store = MemoryStore::default();
     let session_layer = SessionManagerLayer::new(session_store)
         .with_secure(secure_cookie_mode())
         .with_same_site(leptos_use::SameSite::Lax);
 
+    let admin = admin_router
+        .merge(admin_pages)
+        .layer(from_fn_with_state(state.clone(), jwt_validation));
+
+    let public = public_router.merge(public_pages);
+
     let app = Router::new()
-        .leptos_routes(&state, admin_routes, {
-            let leptos_options = state.leptos_options.clone();
-            move || shell(leptos_options.clone())
-        })
-        .layer(from_fn_with_state(state.clone(), jwt_validation)) // Affects all above it. Should be cheap to clone with internally Arc'ed fields.
         .route("/auth/login", get(auth_login_handler))
         .route("/auth/callback", get(auth_callback_handler))
         .route("/auth/refresh", get(refresh_handler))
-        .leptos_routes(&state, public_routes, {
-            let leptos_options = state.leptos_options.clone();
-            move || shell(leptos_options.clone())
-        })
+        .merge(public)
+        .merge(admin)
+        .layer(Extension(pool))
         .layer(session_layer)
         .fallback(leptos_axum::file_and_error_handler::<AppState, _>(shell))
         .with_state(state);
