@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
 use uuid::Uuid;
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 #[cfg_attr(feature = "ssr", derive(sqlx::Type))]
 #[cfg_attr(feature = "ssr", sqlx(type_name = "role"))]
 #[cfg_attr(feature = "ssr", sqlx(rename_all = "lowercase"))]
@@ -12,6 +12,17 @@ pub enum Role {
     Admin,
     Contributor,
     User,
+}
+
+impl Role {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Role::Admin => "admin",
+            Role::Contributor => "contributor",
+            Role::Superuser => "superuser",
+            Role::User => "user",
+        }
+    }
 }
 
 impl From<()> for Role {

@@ -1,3 +1,5 @@
+use std::str;
+
 use leptos::prelude::*;
 use leptos::server;
 use leptos::server_fn::ServerFnError;
@@ -8,9 +10,11 @@ use axum::Extension;
 #[cfg(feature = "ssr")]
 use leptos_axum::extract;
 
+use crate::models::user::Role;
+
 #[server(endpoint = "get-role")]
-pub async fn get_role() -> Result<String, ServerFnError> {
-    let Extension(role): Extension<String> = extract().await?;
+pub async fn get_role() -> Result<Role, ServerFnError> {
+    let Extension(role): Extension<Role> = extract().await?;
     Ok(role)
 }
 
@@ -26,7 +30,7 @@ pub fn SeeRole() -> impl IntoView {
             }>
                 {move || match role.get() {
                     Some(Ok(role)) => {
-                        view! { <p>"Your role is " <strong>{role}</strong></p> }.into_any()
+                        view! { <p>"Your role is " <strong>{role.as_str()}</strong></p> }.into_any()
                     }
                     Some(Err(error)) => {
                         view! {

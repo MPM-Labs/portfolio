@@ -1,3 +1,4 @@
+use app::models::user::Role;
 use axum::{
     extract::{Request, State},
     middleware::Next,
@@ -47,6 +48,10 @@ pub async fn jwt_validation(
     };
 
     event!(Level::DEBUG, role = ?token.claims.user.role, "JWT valid");
+
+    if token.claims.user.role == Role::User {
+        return Err(AppError::AuthError(AuthError::Unauthorized));
+    }
 
     req.extensions_mut().insert(token.claims.user.role.clone());
     req.extensions_mut().insert(token.claims.user);
