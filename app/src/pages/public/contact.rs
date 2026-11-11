@@ -16,11 +16,11 @@ pub fn Contact() -> impl IntoView {
                         <a href="mailto:jonas.baugerud@gmail.com">"jonas.baugerud@gmail.com"</a>
                     </li>
                     <li>
-                        "Ditio e-mail: "<a href="mailto:bedrift@ditio.org">"bedrift@ditio.org"</a>
+                        "OsloMet e-mail: "
+                        <a href="mailto:jobau8311@ditio.org">"jobau8311@ditio.org"</a>
                     </li>
                     <li>
-                        "School e-mail: "
-                        <a href="mailto:jobau8311@oslomet.no">"jobau8311@oslomet.no"</a>
+                        "UiO e-mail: "<a href="mailto:jonashba@ditio.org">"jonashba@ditio.org"</a>
                     </li>
                     <li>
                         "You can also reach out to me through my LinkedIn profile, found "

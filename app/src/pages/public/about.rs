@@ -32,6 +32,26 @@ pub fn About() -> impl IntoView {
                     <span></span>
                 </span>
                 <li>
+                    <p>"August 2026 - Today"</p>
+                    <p>"Functional Programming at UiO"</p>
+                </li>
+                <li>
+                    <p>"August 2026 - Today"</p>
+                    <p>"TA in algorithms and data structures"</p>
+                </li>
+                <li>
+                    <p>"June 2026 - August 2026"</p>
+                    <p>
+                        <a href="https://github.com/The-quantum-6/Metronomicon" target="_blank">
+                            "The Metronomicon project"
+                        </a>
+                    </p>
+                </li>
+                <li>
+                    <p>"January 2026 - June 2026"</p>
+                    <p>"TA in web programming"</p>
+                </li>
+                <li>
                     <p>"August 2024 - Today"</p>
                     <p>"Software Engineering at OsloMet"</p>
                 </li>
@@ -56,9 +76,17 @@ pub fn About() -> impl IntoView {
             <div>
                 <h2>"Irrelevant Experience"</h2>
                 <p>
-                    "If you made it this far and you’re still reading, I figure you may want to know more about me as a person."
+                    "If you made it this far and you're still reading, I figure you may want to know more about me as a person."
                 </p>
-                <p>"This section will be filled in soon. Lorem ipsum dolor sit amet."</p>
+                <p>
+                    "I do genuinely have a lot of passion for technology and programming, and spend a lot of time learning about technologies and tools that aren't taught in university. When I'm not doing that, I enjoy being outdoors, reading or playing piano."
+                </p>
+                <p>
+                    "I grew up in Elverum, outside Hamar. Currently, I live in Ås with my partner. I much prefer having a little more peace and quiet than if we were to live in central Oslo. The train is only 15 minutes anyways, so it doesn't make a big difference travel-wise."
+                </p>
+                <p>
+                    "I'm interested in coffee, in a \"wine-snob\" sort of way. It's basically the same thing. Just as people obsess over the origins and terroir of wine, people do with coffee too. (You might not know that coffee is actually a fresh product! It should be bought whole-bean and list the roasting date(not the best-before date) on the bag.)"
+                </p>
             </div>
             <div>
                 <img src="portrait.avif" alt="Portrait of me." />
