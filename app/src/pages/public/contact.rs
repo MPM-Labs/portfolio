@@ -5,7 +5,7 @@ pub fn Contact() -> impl IntoView {
     view! {
         <section>
             <div>
-                <img src="portrait.avif" alt="Portrait of me." />
+                <img src="outdoors.avif" alt="Me standing outdoors in a mountainous area." />
             </div>
             <div>
                 <h1>"Contact"</h1>
@@ -17,11 +17,9 @@ pub fn Contact() -> impl IntoView {
                     </li>
                     <li>
                         "OsloMet e-mail: "
-                        <a href="mailto:jobau8311@ditio.org">"jobau8311@ditio.org"</a>
+                        <a href="mailto:jobau8311@oslomet.no">"jobau8311@oslomet.no"</a>
                     </li>
-                    <li>
-                        "UiO e-mail: "<a href="mailto:jonashba@ditio.org">"jonashba@ditio.org"</a>
-                    </li>
+                    <li>"UiO e-mail: "<a href="mailto:jonashba@uio.no">"jonashba@uio.no"</a></li>
                     <li>
                         "You can also reach out to me through my LinkedIn profile, found "
                         <a

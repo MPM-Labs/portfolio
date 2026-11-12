@@ -8,7 +8,10 @@ pub fn About() -> impl IntoView {
         </span>
         <section id="about">
             <div>
-                <img src="portrait.avif" alt="Portrait of me." />
+                <img
+                    src="nixcon.avif"
+                    alt="Me and some friends at NixCon, meeting Eelco Dolstra."
+                />
             </div>
             <div>
                 <h1>"About"</h1>
@@ -89,7 +92,7 @@ pub fn About() -> impl IntoView {
                 </p>
             </div>
             <div>
-                <img src="portrait.avif" alt="Portrait of me." />
+                <img src="coffee.avif" alt="Me tasting coffee." />
             </div>
         </section>
     }
