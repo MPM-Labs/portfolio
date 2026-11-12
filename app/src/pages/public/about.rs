@@ -45,14 +45,19 @@ pub fn About() -> impl IntoView {
                 <li>
                     <p>"June 2026 - August 2026"</p>
                     <p>
+                        "The\u{a0}"
                         <a href="https://github.com/The-quantum-6/Metronomicon" target="_blank">
-                            "The Metronomicon project"
-                        </a>
+                            "Metronomicon"
+                        </a> "\u{a0}project"
                     </p>
                 </li>
                 <li>
                     <p>"January 2026 - June 2026"</p>
                     <p>"TA in web programming"</p>
+                </li>
+                <li>
+                    <p>"September 2025 - September 2026"</p>
+                    <p>"Corporate contact in\u{a0}"<a href="https://ditio.org">"Ditio"</a></p>
                 </li>
                 <li>
                     <p>"August 2024 - Today"</p>
