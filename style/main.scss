@@ -16,6 +16,9 @@
     --link-color: #7888FF;
     --eerie-black-light-half: rgba(35, 35, 35, 0.5);
     scroll-behavior: smooth;
+    --art-w: min(600px, 100vw);
+    --art-h: calc(var(--art-w) * 800 / 1400);
+    --footer-h: 44px;
 }
 
 body {
@@ -24,6 +27,37 @@ body {
     color: var(--isabelline);
     display: flex;
     flex-direction: column;
+    position: relative;
+}
+
+// the artwork, pinned just above where the footer lands
+body::before {
+    content: "";
+    position: fixed;
+    left: 50%;
+    bottom: 30px;
+    translate: -50% 0;
+    width: var(--art-w);
+    height: var(--art-h);
+    background: url("/monad.svg") no-repeat center / contain;
+    opacity: 0.6;
+    z-index: -1;
+    pointer-events: none;
+}
+
+// the cover: solid behind content, fading out over the gap
+body::after {
+    content: "";
+    position: absolute;
+    inset: 0 0 var(--footer-h) 0;
+    background: linear-gradient(
+        to bottom,
+        var(--eerie-black-extra-dark) calc(100% - var(--art-h)),
+        rgb(18 18 18 / 0)          calc(100% - var(--art-h) * 0.7),
+        transparent                  100%
+    );
+    z-index: -1;
+    pointer-events: none;
 }
 
 h1 { font-size: 28px; }
@@ -247,6 +281,8 @@ footer {
     border-top: 1px solid var(--isabelline);
     overflow: hidden;
     position: relative;
+    margin-top: 200px;
+    margin-top: var(--art-h);
 }
 
 footer > section {
