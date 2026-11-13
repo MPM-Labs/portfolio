@@ -11,8 +11,8 @@ Work in progress — building this out piece by piece. It'll be something eventu
 | Refresh tokens in-memory for seemless reauth | ✅ Done |
 | Postgres connection via [`sqlx`](https://crates.io/crates/sqlx) | ✅ Done |
 | refresh tokens moved to Postgres | ⬜ Planned |
-| Admin pages *(hopefully you'll never see these 👀)* | ⬜ Planned |
-| Projects page | ⬜ Planned |
+| Admin pages *(hopefully you'll never see these 👀)* | ✅ Done |
+| Projects page | ✅ Done |
 | Dynamic image storage via [MinIO](https://crates.io/crates/aws-sdk-s3) | ⬜ Planned |
 | Postgres backups | ⬜ Planned |
 | Logging | ⬜ Planned |
