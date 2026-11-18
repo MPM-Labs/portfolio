@@ -6,7 +6,12 @@ use crate::{
 };
 use app::{App, shell};
 use axum::{
-    Extension, Router, extract::Request, http::{HeaderValue, header}, middleware::{Next, from_fn_with_state}, response::Response, routing::{get, post}
+    Extension, Router,
+    extract::Request,
+    http::{HeaderValue, header},
+    middleware::{Next, from_fn_with_state},
+    response::Response,
+    routing::{get, post},
 };
 use leptos::{prelude::*, server_fn::axum::server_fn_paths};
 use leptos_axum::{
@@ -135,20 +140,23 @@ async fn main() {
         .unwrap();
 }
 
-
 async fn cache_static(req: Request, next: Next) -> Response {
     let path = req.uri().path();
-    let is_asset = path.starts_with("/pkg/")
-        || [".avif", ".webp", ".png", ".jpg", ".svg", ".woff2"]
-            .iter()
-            .any(|ext| path.ends_with(ext));
+    let value = if path.starts_with("/pkg/") {
+        Some("public, max-age=31536000, immutable")
+    } else if [".avif", ".webp", ".png", ".jpg", ".svg", ".woff2"]
+        .iter()
+        .any(|ext| path.ends_with(ext))
+    {
+        Some("public, max-age=86400")
+    } else {
+        None
+    };
 
     let mut res = next.run(req).await;
-    if is_asset && res.status().is_success() {
-        res.headers_mut().insert(
-            header::CACHE_CONTROL,
-            HeaderValue::from_static("public, max-age=86400"),
-        );
+    if let (Some(v), true) = (value, res.status().is_success()) {
+        res.headers_mut()
+            .insert(header::CACHE_CONTROL, HeaderValue::from_static(v));
     }
     res
 }

@@ -4,7 +4,7 @@ use crate::pages::{
     public::{Public, PublicRoutes},
 };
 use leptos::prelude::*;
-use leptos_meta::{MetaTags, Stylesheet, provide_meta_context};
+use leptos_meta::{HashedStylesheet, MetaTags, provide_meta_context};
 use leptos_router::{
     components::{ParentRoute, Route, Router, Routes},
     path,
@@ -19,7 +19,8 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
                 <meta charset="utf-8" />
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <AutoReload options=options.clone() />
-                <HydrationScripts options />
+                <HydrationScripts options=options.clone() />
+                <HashedStylesheet options id="leptos" />
                 <MetaTags />
                 <link rel="preload" href={"/portrait.avif"} as="image" />
                 <link rel="preload" href={"/nixcon.avif"} as="image" />
@@ -43,7 +44,6 @@ pub fn App() -> impl IntoView {
     provide_meta_context();
 
     view! {
-        <Stylesheet id="leptos" href="/pkg/portfolio.css" />
         <Router>
             <Routes fallback=|| "Not found.">
                 <ParentRoute path=path!("") view=Public>
