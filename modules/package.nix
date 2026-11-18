@@ -55,9 +55,11 @@
         mkdir -p $out/bin $out/site
         cp -r target/site/. $out/site/
         cp target/release/server $out/bin/server
+        cp target/release/hash.txt $out/bin/hash.txt
         wrapProgram $out/bin/server \
           --set LEPTOS_SITE_ROOT $out/site \
-          --set LEPTOS_SITE_PKG_DIR pkg
+          --set LEPTOS_SITE_PKG_DIR pkg \
+          --set LEPTOS_HASH_FILES true
         runHook postInstall
       '';
     };

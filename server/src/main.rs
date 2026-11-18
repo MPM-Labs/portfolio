@@ -8,7 +8,9 @@ use app::{App, shell};
 use axum::{
     Extension, Router,
     extract::Request,
-    middleware::from_fn_with_state,
+    http::{HeaderValue, header},
+    middleware::{Next, from_fn_with_state},
+    response::Response,
     routing::{get, post},
 };
 use leptos::{prelude::*, server_fn::axum::server_fn_paths};
@@ -129,10 +131,32 @@ async fn main() {
         .layer(Extension(pool))
         .layer(session_layer)
         .fallback(leptos_axum::file_and_error_handler::<AppState, _>(shell))
+        .layer(axum::middleware::from_fn(cache_static))
         .with_state(state);
 
     let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
     axum::serve(listener, app.into_make_service())
         .await
         .unwrap();
+}
+
+async fn cache_static(req: Request, next: Next) -> Response {
+    let path = req.uri().path();
+    let value = if path.starts_with("/pkg/") {
+        Some("public, max-age=31536000, immutable")
+    } else if [".avif", ".webp", ".png", ".jpg", ".svg", ".woff2"]
+        .iter()
+        .any(|ext| path.ends_with(ext))
+    {
+        Some("public, max-age=86400")
+    } else {
+        None
+    };
+
+    let mut res = next.run(req).await;
+    if let (Some(v), true) = (value, res.status().is_success()) {
+        res.headers_mut()
+            .insert(header::CACHE_CONTROL, HeaderValue::from_static(v));
+    }
+    res
 }
