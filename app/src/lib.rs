@@ -21,6 +21,11 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
                 <AutoReload options=options.clone() />
                 <HydrationScripts options />
                 <MetaTags />
+                <link rel="preload" href={"/portrait.avif"} as="image" />
+                <link rel="preload" href={"/nixcon.avif"} as="image" />
+                <link rel="preload" href={"/outdoors.avif"} as="image" />
+                <link rel="preload" href={"/coffee.avif"} as="image" />
+                <link rel="preload" href={"/monad.svg"} as="image" />
             </head>
             <body>
                 <App />

@@ -6,10 +6,7 @@ use crate::{
 };
 use app::{App, shell};
 use axum::{
-    Extension, Router,
-    extract::Request,
-    middleware::from_fn_with_state,
-    routing::{get, post},
+    Extension, Router, extract::Request, http::{HeaderValue, header}, middleware::{Next, from_fn_with_state}, response::Response, routing::{get, post}
 };
 use leptos::{prelude::*, server_fn::axum::server_fn_paths};
 use leptos_axum::{
@@ -129,10 +126,29 @@ async fn main() {
         .layer(Extension(pool))
         .layer(session_layer)
         .fallback(leptos_axum::file_and_error_handler::<AppState, _>(shell))
+        .layer(axum::middleware::from_fn(cache_static))
         .with_state(state);
 
     let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
     axum::serve(listener, app.into_make_service())
         .await
         .unwrap();
+}
+
+
+async fn cache_static(req: Request, next: Next) -> Response {
+    let path = req.uri().path();
+    let is_asset = path.starts_with("/pkg/")
+        || [".avif", ".webp", ".png", ".jpg", ".svg", ".woff2"]
+            .iter()
+            .any(|ext| path.ends_with(ext));
+
+    let mut res = next.run(req).await;
+    if is_asset && res.status().is_success() {
+        res.headers_mut().insert(
+            header::CACHE_CONTROL,
+            HeaderValue::from_static("public, max-age=86400"),
+        );
+    }
+    res
 }
