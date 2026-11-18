@@ -1,6 +1,14 @@
 # 🗂️ Portfolio Site
 
-Work in progress — building this out piece by piece. It'll be something eventually.
+A sort of nice portfolio page for Jonas (me!).
+It uses Leptos, meaning the whole thing is written in rust.
+_Disclaimer_: I am no designer, and I don't plan on becoming one (even though I'm very happy with the site and wrote it myself). The design is just CSS and I probably won't be improving it.
+
+The site is currently hosted at [jonas.baugerud.no](https://jonas.baugerud.no).
+It supports CSR for smooth navigation, but also full SSR and hydration. The login system is Google OIDC and only used for managing the portfolio as of right now.
+The site is hosted on a VPS using [my own NixOS-anywhere-based deployment tool](https://github.com/MPM-Labs/nixos-deployment-template). It sits behind a Caddy instance.
+
+I do plan on improving it, but cannot say when or how that will be ;)
 
 ## Roadmap
 
